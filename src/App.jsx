@@ -29,26 +29,25 @@ export default function App() {
       <a className="skip-link" href="#main">
         Skip to content
       </a>
-      <Banner />
-      <header className="app-header">
-        <div className="app-header-top">
-          <p className="brand">
-            Terra Trust <small>Agricultural data trust prototype</small>
-          </p>
-          <RoleSwitcher role={state.role} onChange={setRole} />
+      <header>
+        <Banner />
+        <div className="app-header">
+          <div className="app-header-top">
+            <p className="brand">
+              Terra Trust <small>Agricultural data trust prototype</small>
+            </p>
+            <RoleSwitcher role={state.role} onChange={setRole} />
+          </div>
+          <Tabs label={`${roleLabel} sections`} items={items} current={current} onSelect={setView} />
         </div>
-        <Tabs
-          label={`${roleLabel} sections`}
-          items={items}
-          current={current}
-          onSelect={setView}
-        />
       </header>
-      <main id="main">{View ? <View /> : null}</main>
+      <main id="main" tabIndex={-1}>
+        {View ? <View /> : null}
+      </main>
       <footer className="footer">
         <p>
-          Terra Trust is a research prototype built on synthetic data. Nothing here is real, deployed or legal advice.
-          Your changes are kept in this browser only.{' '}
+          Terra Trust is a research prototype built on synthetic data. Nothing here is real, deployed
+          or legal advice. Your changes are kept in this browser only.{' '}
           <button type="button" className="btn btn-secondary" onClick={resetAll}>
             Reset prototype state
           </button>
