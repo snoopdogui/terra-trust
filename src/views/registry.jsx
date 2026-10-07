@@ -8,6 +8,7 @@ import RevenueSimulator from '../components/Revenue/RevenueSimulator.jsx';
 import FarmerEarnings from '../components/Revenue/FarmerEarnings.jsx';
 import EvaluationView from '../components/Evaluation/EvaluationView.jsx';
 import ReadinessView from '../components/Readiness/ReadinessView.jsx';
+import PolicyView from '../components/Policy/PolicyView.jsx';
 import UssdSimulator from '../components/Ussd/UssdSimulator.jsx';
 import ConsentOverview from '../components/Consent/ConsentOverview.jsx';
 
@@ -19,6 +20,7 @@ export const VIEW_COMPONENTS = {
   'farmer:phone': UssdSimulator,
   'trust:dataset': DatasetView,
   'trust:consent': ConsentOverview,
+  'trust:policy': PolicyView,
   'trust:audit': AuditLog,
   'trust:revenue': RevenueSimulator,
   'trust:evaluation': EvaluationView,

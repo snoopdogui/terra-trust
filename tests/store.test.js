@@ -30,3 +30,13 @@ describe('store reducer', () => {
     expect(s2.views.trust).toBe('overview');
   });
 });
+
+describe('policy settings', () => {
+  it('applies a new minimum group size to the trust state and clamps it', async () => {
+    const { reducer: r, defaultState: d } = await import('../src/state/store.jsx');
+    const s1 = r(d(), { type: 'policy/minCohort', value: 15 });
+    expect(s1.trust.config.minCohort).toBe(15);
+    expect(r(s1, { type: 'policy/minCohort', value: 1 }).trust.config.minCohort).toBe(2);
+    expect(r(s1, { type: 'policy/minCohort', value: 9999 }).trust.config.minCohort).toBe(50);
+  });
+});

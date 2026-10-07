@@ -16,6 +16,7 @@ export const VIEWS = {
     { id: 'overview', label: 'Overview' },
     { id: 'dataset', label: 'Dataset' },
     { id: 'consent', label: 'Consent ledger' },
+    { id: 'policy', label: 'Policy' },
     { id: 'audit', label: 'Audit log' },
     { id: 'revenue', label: 'Revenue split' },
     { id: 'evaluation', label: 'Evaluation' },
