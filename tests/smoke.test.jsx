@@ -99,3 +99,23 @@ describe('render with query outcomes', () => {
     expect(farmerHtml).toContain('credited so far');
   });
 });
+
+import EvaluationView from '../src/components/Evaluation/EvaluationView.jsx';
+import { runEvaluation } from '../src/core/evaluation/runner.js';
+
+describe('evaluation screen', () => {
+  it('shows the pass rate, per-family results and the known gaps after a run', () => {
+    const html = renderToString(<EvaluationView initialReport={runEvaluation()} />);
+    expect(html).toContain('25 of 25');
+    expect(html).toContain('100.0%');
+    expect(html).toContain('Known gap');
+    expect(html).toContain('Threat model');
+    expect(html).toContain('What a pass means');
+    expect(html).not.toMatch(/\u2014/);
+  });
+  it('lists every case as not run before the button is pressed', () => {
+    const html = renderToString(<EvaluationView />);
+    expect(html).toContain('Not run');
+    expect(html).not.toContain('25 of 25');
+  });
+});

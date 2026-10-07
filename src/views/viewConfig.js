@@ -18,6 +18,7 @@ export const VIEWS = {
     { id: 'consent', label: 'Consent ledger' },
     { id: 'audit', label: 'Audit log' },
     { id: 'revenue', label: 'Revenue split' },
+    { id: 'evaluation', label: 'Evaluation' },
   ],
   buyer: [
     { id: 'overview', label: 'Overview' },

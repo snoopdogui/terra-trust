@@ -666,3 +666,25 @@ fieldset {
     scroll-behavior: auto !important;
   }
 }
+
+/* ---------- definition lists (threat model) ---------- */
+dl {
+  margin: 0 0 var(--space-4);
+  max-width: 70ch;
+}
+dl .panel dt {
+  margin-bottom: var(--space-2);
+}
+dd {
+  margin: 0;
+}
+dd p {
+  max-width: none;
+}
+details > summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+details[open] > summary {
+  margin-bottom: var(--space-2);
+}

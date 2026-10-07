@@ -6,6 +6,7 @@ import BuyerHistory from '../components/Portal/BuyerHistory.jsx';
 import AuditLog from '../components/Audit/AuditLog.jsx';
 import RevenueSimulator from '../components/Revenue/RevenueSimulator.jsx';
 import FarmerEarnings from '../components/Revenue/FarmerEarnings.jsx';
+import EvaluationView from '../components/Evaluation/EvaluationView.jsx';
 import UssdSimulator from '../components/Ussd/UssdSimulator.jsx';
 import ConsentOverview from '../components/Consent/ConsentOverview.jsx';
 
@@ -19,6 +20,7 @@ export const VIEW_COMPONENTS = {
   'trust:consent': ConsentOverview,
   'trust:audit': AuditLog,
   'trust:revenue': RevenueSimulator,
+  'trust:evaluation': EvaluationView,
   'farmer:earnings': FarmerEarnings,
   'buyer:portal': BuyerPortal,
   'buyer:history': BuyerHistory,
