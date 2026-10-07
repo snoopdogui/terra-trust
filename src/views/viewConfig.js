@@ -7,6 +7,9 @@ export const ROLES = [
 // Views are added here as features land. Order is the tab order.
 export const VIEWS = {
   farmer: [{ id: 'overview', label: 'Overview' }],
-  trust: [{ id: 'overview', label: 'Overview' }],
+  trust: [
+    { id: 'overview', label: 'Overview' },
+    { id: 'dataset', label: 'Dataset' },
+  ],
   buyer: [{ id: 'overview', label: 'Overview' }],
 };
