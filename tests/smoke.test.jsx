@@ -70,4 +70,16 @@ describe('render with query outcomes', () => {
     expect(html).toContain('Purpose not permitted');
     expect(html).not.toContain('Differencing risk');
   });
+  it('shows consenting-farmer counts and every outcome in the trust audit log', () => {
+    const html = renderToString(
+      <StoreProvider persist={false} overrides={{ role: 'trust', views: { farmer: 'overview', trust: 'audit', buyer: 'overview' }, trust }}>
+        <App />
+      </StoreProvider>,
+    );
+    expect(html).toContain('Consenting farmers matched');
+    expect(html).toContain('Differencing risk');
+    expect(html).toContain('Purpose not permitted');
+    expect(html).toContain('Group too small');
+    expect(html).not.toMatch(/\u2014/);
+  });
 });
