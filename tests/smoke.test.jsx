@@ -119,3 +119,17 @@ describe('evaluation screen', () => {
     expect(html).not.toContain('25 of 25');
   });
 });
+
+import ReadinessView from '../src/components/Readiness/ReadinessView.jsx';
+
+describe('readiness screen', () => {
+  it('shows every ODI category, the disclaimer and the download buttons', () => {
+    const html = renderToString(<ReadinessView initialHash={'a'.repeat(64)} />);
+    for (const heading of ['Dataset properties', 'Metadata', 'Surrounding infrastructure', 'Governance']) expect(html).toContain(heading);
+    expect(html).toContain('not an implementation');
+    expect(html).toContain('no overall score');
+    expect(html).toContain('Download data card (JSON-LD)');
+    expect(html).toContain('Download synthetic dataset (CSV)');
+    expect(html).not.toMatch(/\u2014/);
+  });
+});

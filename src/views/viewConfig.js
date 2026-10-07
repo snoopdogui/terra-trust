@@ -19,6 +19,7 @@ export const VIEWS = {
     { id: 'audit', label: 'Audit log' },
     { id: 'revenue', label: 'Revenue split' },
     { id: 'evaluation', label: 'Evaluation' },
+    { id: 'readiness', label: 'AI-readiness' },
   ],
   buyer: [
     { id: 'overview', label: 'Overview' },
