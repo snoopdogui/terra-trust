@@ -9,6 +9,7 @@ export const VIEWS = {
   farmer: [
     { id: 'overview', label: 'Overview' },
     { id: 'consent', label: 'My consent' },
+    { id: 'phone', label: 'Feature phone (USSD)' },
   ],
   trust: [
     { id: 'overview', label: 'Overview' },
