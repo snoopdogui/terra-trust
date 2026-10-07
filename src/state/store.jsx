@@ -1,14 +1,31 @@
 import { createContext, useContext, useEffect, useMemo, useReducer } from 'react';
 import { STORAGE_KEY } from '../core/constants.js';
+import {
+  createTrustState,
+  isUsableTrustState,
+  setConsent,
+  withdrawAllConsent,
+} from '../core/trustState.js';
+import { DATASET } from './dataset.js';
+
+// One store drives every view. Consent changes made on the web, on the simulated feature
+// phone or anywhere else go through the same reducer, so every view sees them at once.
 
 const StoreContext = createContext(null);
 
-const STORE_VERSION = 1;
+const STORE_VERSION = 2;
+const FIRST_FARMER = DATASET.farmers[0].id;
 
-function defaultState() {
+function freshTrust() {
+  return createTrustState({ initialConsent: DATASET.initialConsent, seed: DATASET.meta.seed });
+}
+
+export function defaultState() {
   return {
     role: 'farmer',
     views: { farmer: 'overview', trust: 'overview', buyer: 'overview' },
+    farmerId: FIRST_FARMER,
+    trust: freshTrust(),
   };
 }
 
@@ -18,23 +35,39 @@ function loadPersisted() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const data = JSON.parse(raw);
-    return data && data.version === STORE_VERSION ? data : null;
+    return data && data.version === STORE_VERSION ? data.state : null;
   } catch {
     return null;
   }
 }
 
 function init({ persist, overrides }) {
+  const base = defaultState();
   const saved = persist ? loadPersisted() : null;
-  return { ...defaultState(), ...(saved ? saved.state : {}), ...(overrides || {}) };
+  const merged = { ...base };
+  if (saved) {
+    if (saved.role) merged.role = saved.role;
+    if (saved.views) merged.views = { ...base.views, ...saved.views };
+    if (saved.farmerId && DATASET.farmers.some((f) => f.id === saved.farmerId)) merged.farmerId = saved.farmerId;
+    if (isUsableTrustState(saved.trust, { seed: DATASET.meta.seed, farmerCount: DATASET.farmers.length })) {
+      merged.trust = saved.trust;
+    }
+  }
+  return { ...merged, ...(overrides || {}) };
 }
 
-function reducer(state, action) {
+export function reducer(state, action) {
   switch (action.type) {
     case 'ui/role':
       return { ...state, role: action.role };
     case 'ui/view':
       return { ...state, views: { ...state.views, [state.role]: action.view } };
+    case 'ui/farmer':
+      return { ...state, farmerId: action.farmerId };
+    case 'consent/set':
+      return { ...state, trust: setConsent(state.trust, { ...action.change, at: action.at }) };
+    case 'consent/withdrawAll':
+      return { ...state, trust: withdrawAllConsent(state.trust, { farmerId: action.farmerId, channel: action.channel, at: action.at }) };
     case 'app/reset':
       return defaultState();
     default:
@@ -62,4 +95,21 @@ export function useStore() {
   const ctx = useContext(StoreContext);
   if (!ctx) throw new Error('useStore must be used inside StoreProvider');
   return ctx;
+}
+
+/** Action helpers so components do not build action objects by hand. */
+export function useActions() {
+  const { dispatch } = useStore();
+  return useMemo(
+    () => ({
+      setRole: (role) => dispatch({ type: 'ui/role', role }),
+      setView: (view) => dispatch({ type: 'ui/view', view }),
+      selectFarmer: (farmerId) => dispatch({ type: 'ui/farmer', farmerId }),
+      setConsent: (change) => dispatch({ type: 'consent/set', change, at: new Date().toISOString() }),
+      withdrawAll: (farmerId, channel = 'web') =>
+        dispatch({ type: 'consent/withdrawAll', farmerId, channel, at: new Date().toISOString() }),
+      resetAll: () => dispatch({ type: 'app/reset' }),
+    }),
+    [dispatch],
+  );
 }
