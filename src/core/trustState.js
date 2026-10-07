@@ -6,8 +6,9 @@ import { DEFAULT_MIN_COHORT, HISTORY_CAP } from './constants.js';
 import { createLedger, setConsent as ledgerSetConsent, withdrawAll as ledgerWithdrawAll } from './consentLedger.js';
 import { categoryKey } from './differencing.js';
 import { evaluateQuery, normalizeMinCohort } from './policyEngine.js';
+import { createRevenueState, recordRevenue, setSplit } from './revenue.js';
 
-export const TRUST_STATE_VERSION = 2;
+export const TRUST_STATE_VERSION = 3;
 export const AUDIT_CAP = 2000; // keeps localStorage small; the README notes the cap
 
 export function createTrustState({ initialConsent, seed = null, config = {} }) {
@@ -18,6 +19,7 @@ export function createTrustState({ initialConsent, seed = null, config = {} }) {
     ledger: createLedger(initialConsent),
     history: [], // internal: cohorts behind each released answer, used by the differencing guard
     audit: [], // one entry per query, whatever the outcome
+    revenue: createRevenueState(),
     nextId: 1,
   };
 }
@@ -34,6 +36,12 @@ export function withdrawAllConsent(state, args) {
 
 export function setMinCohort(state, k) {
   return { ...state, config: { ...state.config, minCohort: normalizeMinCohort(k) } };
+}
+
+/** Change the revenue split for future queries. Invalid splits leave the state unchanged. */
+export function setRevenueSplit(state, split) {
+  const revenue = setSplit(state.revenue, split);
+  return revenue === state.revenue ? state : { ...state, revenue };
 }
 
 /**
@@ -78,7 +86,17 @@ export function submitQuery(state, ctx, request, at = null) {
     ].slice(-HISTORY_CAP);
   }
 
-  const next = { ...state, history, audit: [...state.audit, entry].slice(-AUDIT_CAP), nextId: id + 1 };
+  let revenue = state.revenue;
+  if (outcome.decision === 'allow') {
+    revenue = recordRevenue(revenue, {
+      queryId: id,
+      at,
+      feePesewas: outcome.feePesewas,
+      contributors: outcome.internal.contributors,
+    });
+  }
+
+  const next = { ...state, history, revenue, audit: [...state.audit, entry].slice(-AUDIT_CAP), nextId: id + 1 };
   return { state: next, entry, outcome };
 }
 
@@ -92,6 +110,8 @@ export function isUsableTrustState(state, { seed, farmerCount }) {
       state.ledger.effective &&
       Array.isArray(state.audit) &&
       Array.isArray(state.history) &&
+      state.revenue &&
+      state.revenue.split &&
       Object.keys(state.ledger.effective).length === farmerCount,
   );
 }

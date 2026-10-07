@@ -82,4 +82,20 @@ describe('render with query outcomes', () => {
     expect(html).toContain('Group too small');
     expect(html).not.toMatch(/\u2014/);
   });
+  it('shows the running revenue ledger and farmer earnings once queries are released', () => {
+    const html = renderToString(
+      <StoreProvider persist={false} overrides={{ role: 'trust', views: { farmer: 'overview', trust: 'revenue', buyer: 'overview' }, trust }}>
+        <App />
+      </StoreProvider>,
+    );
+    expect(html).toContain('Running ledger');
+    expect(html).toContain('Split used');
+    expect(html).not.toContain('The ledger fills as buyers receive answers');
+    const farmerHtml = renderToString(
+      <StoreProvider persist={false} overrides={{ role: 'farmer', views: { farmer: 'earnings', trust: 'overview', buyer: 'overview' }, trust }}>
+        <App />
+      </StoreProvider>,
+    );
+    expect(farmerHtml).toContain('credited so far');
+  });
 });

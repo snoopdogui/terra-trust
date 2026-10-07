@@ -5,6 +5,7 @@ import {
   isUsableTrustState,
   setConsent,
   setMinCohort,
+  setRevenueSplit,
   submitQuery,
   withdrawAllConsent,
 } from '../core/trustState.js';
@@ -15,7 +16,7 @@ import { DATASET } from './dataset.js';
 
 const StoreContext = createContext(null);
 
-const STORE_VERSION = 3;
+const STORE_VERSION = 4;
 const FIRST_FARMER = DATASET.farmers[0].id;
 
 function freshTrust() {
@@ -76,6 +77,8 @@ export function reducer(state, action) {
       const { state: trust, entry } = submitQuery(state.trust, { dataset: DATASET, buyers: BUYERS }, action.request, action.at);
       return { ...state, trust, lastQueryId: entry.id };
     }
+    case 'revenue/split':
+      return { ...state, trust: setRevenueSplit(state.trust, action.split) };
     case 'policy/minCohort':
       return { ...state, trust: setMinCohort(state.trust, action.value) };
     case 'consent/set':
@@ -121,6 +124,7 @@ export function useActions() {
       selectFarmer: (farmerId) => dispatch({ type: 'ui/farmer', farmerId }),
       selectBuyer: (buyerId) => dispatch({ type: 'ui/buyer', buyerId }),
       submitQuery: (request) => dispatch({ type: 'query/submit', request, at: new Date().toISOString() }),
+      setRevenueSplit: (split) => dispatch({ type: 'revenue/split', split }),
       setMinCohort: (value) => dispatch({ type: 'policy/minCohort', value }),
       setConsent: (change) => dispatch({ type: 'consent/set', change, at: new Date().toISOString() }),
       withdrawAll: (farmerId, channel = 'web') =>

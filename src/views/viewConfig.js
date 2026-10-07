@@ -10,12 +10,14 @@ export const VIEWS = {
     { id: 'overview', label: 'Overview' },
     { id: 'consent', label: 'My consent' },
     { id: 'phone', label: 'Feature phone (USSD)' },
+    { id: 'earnings', label: 'My earnings' },
   ],
   trust: [
     { id: 'overview', label: 'Overview' },
     { id: 'dataset', label: 'Dataset' },
     { id: 'consent', label: 'Consent ledger' },
     { id: 'audit', label: 'Audit log' },
+    { id: 'revenue', label: 'Revenue split' },
   ],
   buyer: [
     { id: 'overview', label: 'Overview' },

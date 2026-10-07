@@ -4,6 +4,8 @@ import FarmerConsentView from '../components/Consent/FarmerConsentView.jsx';
 import BuyerPortal from '../components/Portal/BuyerPortal.jsx';
 import BuyerHistory from '../components/Portal/BuyerHistory.jsx';
 import AuditLog from '../components/Audit/AuditLog.jsx';
+import RevenueSimulator from '../components/Revenue/RevenueSimulator.jsx';
+import FarmerEarnings from '../components/Revenue/FarmerEarnings.jsx';
 import UssdSimulator from '../components/Ussd/UssdSimulator.jsx';
 import ConsentOverview from '../components/Consent/ConsentOverview.jsx';
 
@@ -16,6 +18,8 @@ export const VIEW_COMPONENTS = {
   'trust:dataset': DatasetView,
   'trust:consent': ConsentOverview,
   'trust:audit': AuditLog,
+  'trust:revenue': RevenueSimulator,
+  'farmer:earnings': FarmerEarnings,
   'buyer:portal': BuyerPortal,
   'buyer:history': BuyerHistory,
   'buyer:overview': () => <OverviewView role="buyer" />,
