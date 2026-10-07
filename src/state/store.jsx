@@ -1,9 +1,11 @@
 import { createContext, useContext, useEffect, useMemo, useReducer } from 'react';
-import { STORAGE_KEY } from '../core/constants.js';
+import { BUYERS, STORAGE_KEY } from '../core/constants.js';
 import {
   createTrustState,
   isUsableTrustState,
   setConsent,
+  setMinCohort,
+  submitQuery,
   withdrawAllConsent,
 } from '../core/trustState.js';
 import { DATASET } from './dataset.js';
@@ -13,7 +15,7 @@ import { DATASET } from './dataset.js';
 
 const StoreContext = createContext(null);
 
-const STORE_VERSION = 2;
+const STORE_VERSION = 3;
 const FIRST_FARMER = DATASET.farmers[0].id;
 
 function freshTrust() {
@@ -25,6 +27,8 @@ export function defaultState() {
     role: 'farmer',
     views: { farmer: 'overview', trust: 'overview', buyer: 'overview' },
     farmerId: FIRST_FARMER,
+    buyerId: BUYERS[0].id,
+    lastQueryId: null,
     trust: freshTrust(),
   };
 }
@@ -49,8 +53,10 @@ function init({ persist, overrides }) {
     if (saved.role) merged.role = saved.role;
     if (saved.views) merged.views = { ...base.views, ...saved.views };
     if (saved.farmerId && DATASET.farmers.some((f) => f.id === saved.farmerId)) merged.farmerId = saved.farmerId;
+    if (saved.buyerId && BUYERS.some((b) => b.id === saved.buyerId)) merged.buyerId = saved.buyerId;
     if (isUsableTrustState(saved.trust, { seed: DATASET.meta.seed, farmerCount: DATASET.farmers.length })) {
       merged.trust = saved.trust;
+      merged.lastQueryId = saved.lastQueryId ?? null;
     }
   }
   return { ...merged, ...(overrides || {}) };
@@ -64,6 +70,14 @@ export function reducer(state, action) {
       return { ...state, views: { ...state.views, [state.role]: action.view } };
     case 'ui/farmer':
       return { ...state, farmerId: action.farmerId };
+    case 'ui/buyer':
+      return { ...state, buyerId: action.buyerId };
+    case 'query/submit': {
+      const { state: trust, entry } = submitQuery(state.trust, { dataset: DATASET, buyers: BUYERS }, action.request, action.at);
+      return { ...state, trust, lastQueryId: entry.id };
+    }
+    case 'policy/minCohort':
+      return { ...state, trust: setMinCohort(state.trust, action.value) };
     case 'consent/set':
       return { ...state, trust: setConsent(state.trust, { ...action.change, at: action.at }) };
     case 'consent/withdrawAll':
@@ -105,6 +119,9 @@ export function useActions() {
       setRole: (role) => dispatch({ type: 'ui/role', role }),
       setView: (view) => dispatch({ type: 'ui/view', view }),
       selectFarmer: (farmerId) => dispatch({ type: 'ui/farmer', farmerId }),
+      selectBuyer: (buyerId) => dispatch({ type: 'ui/buyer', buyerId }),
+      submitQuery: (request) => dispatch({ type: 'query/submit', request, at: new Date().toISOString() }),
+      setMinCohort: (value) => dispatch({ type: 'policy/minCohort', value }),
       setConsent: (change) => dispatch({ type: 'consent/set', change, at: new Date().toISOString() }),
       withdrawAll: (farmerId, channel = 'web') =>
         dispatch({ type: 'consent/withdrawAll', farmerId, channel, at: new Date().toISOString() }),

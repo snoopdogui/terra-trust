@@ -27,3 +27,47 @@ describe('render smoke test', () => {
     }
   }
 });
+
+// Rendering with real query outcomes in state (released, refused, differencing).
+import { BUYERS } from '../src/core/constants.js';
+import { DATASET } from '../src/state/dataset.js';
+import { createTrustState, submitQuery } from '../src/core/trustState.js';
+
+function trustWithQueries() {
+  let trust = createTrustState({ initialConsent: structuredClone(DATASET.initialConsent), seed: DATASET.meta.seed });
+  const ctx = { dataset: DATASET, buyers: BUYERS };
+  const base = { buyerId: 'buyer-a', purpose: 'supply_chain_planning', queryType: 'mean_yield', filter: {}, groupBy: null };
+  const requests = [
+    base,
+    { ...base, filter: { zone: ['D3'] } },
+    { ...base, buyerId: 'buyer-c', purpose: 'eudr_due_diligence' },
+    { ...base, filter: { cooperative: ['coop-f'] } },
+    { ...base, filter: { cooperative: ['coop-f'], ageBand: ['18-34', '35-44', '45-54', '55-64'] } },
+  ];
+  for (const r of requests) trust = submitQuery(trust, ctx, r, '2026-01-01T00:00:00.000Z').state;
+  return trust;
+}
+
+describe('render with query outcomes', () => {
+  const trust = trustWithQueries();
+  it('shows the outcome and the check trail in the portal', () => {
+    const html = renderToString(
+      <StoreProvider persist={false} overrides={{ role: 'buyer', views: { farmer: 'overview', trust: 'overview', buyer: 'portal' }, trust, lastQueryId: 5, buyerId: 'buyer-a' }}>
+        <App />
+      </StoreProvider>,
+    );
+    expect(html).toContain('query refused');
+    expect(html).toContain('Differencing risk');
+    expect(html).toContain('Policy checks in order');
+    expect(html).not.toMatch(/\u2014/);
+  });
+  it('lists only the selected buyer\'s queries in My queries', () => {
+    const html = renderToString(
+      <StoreProvider persist={false} overrides={{ role: 'buyer', views: { farmer: 'overview', trust: 'overview', buyer: 'history' }, trust, buyerId: 'buyer-c' }}>
+        <App />
+      </StoreProvider>,
+    );
+    expect(html).toContain('Purpose not permitted');
+    expect(html).not.toContain('Differencing risk');
+  });
+});
